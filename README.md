@@ -2,7 +2,7 @@
 
 Automatically signs you into greytHR every weekday at 10 AM IST. Runs on GitHub Actions — nothing to install, no server needed.
 
-## Setup (3 minutes)
+## Setup 
 
 1. **Fork or clone this repo** to your own GitHub account.
 
@@ -19,7 +19,7 @@ Automatically signs you into greytHR every weekday at 10 AM IST. Runs on GitHub 
 
 It now fires every Mon–Fri at ~10 AM IST.
 
-## Get notified on your phone (recommended — 2 min)
+## Get notified on your phone (recommended)
 
 Pick ntfy.sh for the easiest setup. It's a free push-notification service with no account needed.
 
