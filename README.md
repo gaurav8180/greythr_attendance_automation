@@ -2,7 +2,7 @@
 
 Automatically signs you into greytHR every weekday at 10 AM IST. Runs on GitHub Actions — nothing to install, no server needed.
 
-## Setup
+## Setup (3 minutes)
 
 1. **Fork or clone this repo** to your own GitHub account.
 
@@ -17,7 +17,24 @@ Automatically signs you into greytHR every weekday at 10 AM IST. Runs on GitHub 
 
 4. **Test it** — *Actions* tab → *greytHR sign-in* → *Run workflow*. If the log shows `Result: signed-in`, you're done.
 
-That's it. It'll fire every Mon–Fri at ~10 AM IST from now on.
+It now fires every Mon–Fri at ~10 AM IST.
+
+## Get notified on your phone (recommended — 2 min)
+
+Pick ntfy.sh for the easiest setup. It's a free push-notification service with no account needed.
+
+1. Install the **[ntfy](https://ntfy.sh)** app — [iOS](https://apps.apple.com/app/ntfy/id1625396347) / [Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy).
+2. In the app: **+ → Subscribe to topic**. Pick something unguessable, like `yourname-greythr-x7k2m9pq`. Treat it like a password — anyone who knows the topic can send you notifications.
+3. Add a GitHub secret named `NTFY_TOPIC` with the same topic string (just the name, no URL).
+
+That's it. After each run you'll get a phone notification:
+- ✅ "Your attendance has been marked for today at greytHR"
+- 🏖️ "Holiday today — no attendance needed"
+- ❌ "Attendance was NOT marked. Tap to view logs" (with a link)
+
+If the `NTFY_TOPIC` secret isn't set, the workflow just skips the notification.
+
+> **Prefer Slack?** You can swap ntfy for a Slack [incoming webhook](https://api.slack.com/messaging/webhooks) — but it requires creating a Slack app, adding it to a channel, and copying the webhook URL. The ntfy setup above is faster.
 
 ## Adding holidays or days off
 
@@ -42,13 +59,3 @@ Edit the cron in [`.github/workflows/attendance.yml`](.github/workflows/attendan
 ## Update password
 
 *Settings → Secrets → `GREYTHR_PASSWORD` → Update*. No code change needed.
-
-## Optional: phone notifications via ntfy.sh
-
-Get a push notification on your phone each time the bot runs.
-
-1. Install the **[ntfy](https://ntfy.sh)** app on your phone.
-2. In the app, subscribe to a topic — pick something unguessable like `gaurav-greythr-x7k2m9pq` (anyone who knows the topic can send you notifications, so don't use a common word).
-3. Add a GitHub secret named `NTFY_TOPIC` with that exact topic name.
-
-If the secret isn't set, the workflow just skips the notification.
