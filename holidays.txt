@@ -1,0 +1,17 @@
+# Branch India public holidays (from greytHR holiday calendar).
+# Format: YYYY-MM-DD  # optional comment
+# Saturdays/Sundays are skipped automatically — no need to list them here.
+
+# 2026
+2026-01-01  # New Year
+2026-01-14  # Pongal / Makar Sankranti
+2026-01-26  # Republic Day
+2026-03-03  # Holi
+2026-04-03  # Good Friday
+2026-05-01  # Labour Day
+2026-05-27  # Bakr-Id
+2026-08-28  # Raksha Bandhan
+2026-09-14  # Ganesh Chaturthi
+2026-10-02  # Gandhi Jayanti
+2026-10-20  # Dussehra
+2026-12-25  # Christmas
