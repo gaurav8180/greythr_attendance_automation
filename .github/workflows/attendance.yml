@@ -34,14 +34,3 @@ jobs:
           GREYTHR_EMP_ID: ${{ secrets.GREYTHR_EMP_ID }}
           GREYTHR_PASSWORD: ${{ secrets.GREYTHR_PASSWORD }}
         run: node attendance.js
-
-      - name: Upload artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots
-          path: |
-            result.png
-            error.png
-          if-no-files-found: ignore
-          retention-days: 14
