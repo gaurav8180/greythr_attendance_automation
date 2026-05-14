@@ -43,11 +43,12 @@ Edit the cron in [`.github/workflows/attendance.yml`](.github/workflows/attendan
 
 *Settings → Secrets → `GREYTHR_PASSWORD` → Update*. No code change needed.
 
-## Optional: Slack notifications
+## Optional: phone notifications via ntfy.sh
 
-Get a Slack ping each time the bot runs (success, skip, or failure).
+Get a push notification on your phone each time the bot runs.
 
-1. Create an [incoming webhook](https://api.slack.com/messaging/webhooks) for the channel you want messages in. Copy the URL.
-2. Add a secret named `SLACK_WEBHOOK_URL` with that URL.
+1. Install the **[ntfy](https://ntfy.sh)** app on your phone.
+2. In the app, subscribe to a topic — pick something unguessable like `gaurav-greythr-x7k2m9pq` (anyone who knows the topic can send you notifications, so don't use a common word).
+3. Add a GitHub secret named `NTFY_TOPIC` with that exact topic name.
 
 If the secret isn't set, the workflow just skips the notification.

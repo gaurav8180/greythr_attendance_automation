@@ -36,35 +36,41 @@ jobs:
           GREYTHR_PASSWORD: ${{ secrets.GREYTHR_PASSWORD }}
         run: node attendance.js
 
-      - name: Notify Slack
+      - name: Notify via ntfy
         if: always()
         continue-on-error: true
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           STATUS: ${{ job.status }}
           RESULT: ${{ steps.signin.outputs.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if [ -z "$SLACK_WEBHOOK_URL" ]; then
-            echo "No SLACK_WEBHOOK_URL secret set — skipping notification."
+          if [ -z "$NTFY_TOPIC" ]; then
+            echo "No NTFY_TOPIC secret set — skipping notification."
             exit 0
           fi
 
           case "$STATUS" in
             success)
               case "$RESULT" in
-                signed-in)         MSG=":white_check_mark: greytHR: signed in for today" ;;
-                already-signed-in) MSG=":white_check_mark: greytHR: already signed in" ;;
-                weekend)           MSG=":sleeping: Weekend — no swipe needed" ;;
-                holiday)           MSG=":palm_tree: Holiday today — no swipe needed" ;;
-                *)                 MSG=":white_check_mark: greytHR run finished ($RESULT)" ;;
+                signed-in)         TITLE="greytHR"; BODY="Signed in for today"; TAGS="white_check_mark"; PRIORITY="default" ;;
+                already-signed-in) TITLE="greytHR"; BODY="Already signed in";    TAGS="white_check_mark"; PRIORITY="default" ;;
+                weekend)           TITLE="greytHR"; BODY="Weekend — no swipe needed"; TAGS="sleeping"; PRIORITY="low" ;;
+                holiday)           TITLE="greytHR"; BODY="Holiday today — no swipe needed"; TAGS="palm_tree"; PRIORITY="low" ;;
+                *)                 TITLE="greytHR"; BODY="Run finished ($RESULT)"; TAGS="white_check_mark"; PRIORITY="default" ;;
               esac
               ;;
             *)
-              MSG=":x: greytHR sign-in failed — <$RUN_URL|view logs>"
+              TITLE="greytHR FAILED"
+              BODY="Sign-in failed. See $RUN_URL"
+              TAGS="x,warning"
+              PRIORITY="high"
               ;;
           esac
 
-          curl -sS -X POST -H 'Content-Type: application/json' \
-            --data "$(jq -nc --arg text "$MSG" '{text:$text}')" \
-            "$SLACK_WEBHOOK_URL"
+          curl -sS \
+            -H "Title: $TITLE" \
+            -H "Tags: $TAGS" \
+            -H "Priority: $PRIORITY" \
+            -d "$BODY" \
+            "https://ntfy.sh/$NTFY_TOPIC"
