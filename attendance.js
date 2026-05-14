@@ -32,6 +32,13 @@ function loadHolidays() {
   );
 }
 
+function setOutput(key, value) {
+  const file = process.env.GITHUB_OUTPUT;
+  if (file) {
+    fs.appendFileSync(file, `${key}=${value}\n`);
+  }
+}
+
 async function signIn(page, empId, password) {
   await page.goto(LOGIN_URL, { waitUntil: 'domcontentloaded' });
 
@@ -65,11 +72,13 @@ async function main() {
 
   if (dow === 'Sat' || dow === 'Sun') {
     console.log('Weekend — skipping.');
+    setOutput('result', 'weekend');
     return;
   }
 
   if (loadHolidays().has(date)) {
     console.log('Public holiday — skipping.');
+    setOutput('result', 'holiday');
     return;
   }
 
@@ -86,8 +95,10 @@ async function main() {
   try {
     const result = await signIn(page, empId, password);
     console.log(`Result: ${result}`);
+    setOutput('result', result);
     await page.screenshot({ path: 'result.png' }).catch(() => {});
   } catch (err) {
+    setOutput('result', 'error');
     await page.screenshot({ path: 'error.png', fullPage: true }).catch(() => {});
     throw err;
   } finally {

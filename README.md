@@ -42,3 +42,12 @@ Edit the cron in [`.github/workflows/attendance.yml`](.github/workflows/attendan
 ## Update password
 
 *Settings → Secrets → `GREYTHR_PASSWORD` → Update*. No code change needed.
+
+## Optional: Slack notifications
+
+Get a Slack ping each time the bot runs (success, skip, or failure).
+
+1. Create an [incoming webhook](https://api.slack.com/messaging/webhooks) for the channel you want messages in. Copy the URL.
+2. Add a secret named `SLACK_WEBHOOK_URL` with that URL.
+
+If the secret isn't set, the workflow just skips the notification.

@@ -30,7 +30,41 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run sign-in
+        id: signin
         env:
           GREYTHR_EMP_ID: ${{ secrets.GREYTHR_EMP_ID }}
           GREYTHR_PASSWORD: ${{ secrets.GREYTHR_PASSWORD }}
         run: node attendance.js
+
+      - name: Notify Slack
+        if: always()
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          STATUS: ${{ job.status }}
+          RESULT: ${{ steps.signin.outputs.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "No SLACK_WEBHOOK_URL secret set — skipping notification."
+            exit 0
+          fi
+
+          case "$STATUS" in
+            success)
+              case "$RESULT" in
+                signed-in)         MSG=":white_check_mark: greytHR: signed in for today" ;;
+                already-signed-in) MSG=":white_check_mark: greytHR: already signed in" ;;
+                weekend)           MSG=":sleeping: Weekend — no swipe needed" ;;
+                holiday)           MSG=":palm_tree: Holiday today — no swipe needed" ;;
+                *)                 MSG=":white_check_mark: greytHR run finished ($RESULT)" ;;
+              esac
+              ;;
+            *)
+              MSG=":x: greytHR sign-in failed — <$RUN_URL|view logs>"
+              ;;
+          esac
+
+          curl -sS -X POST -H 'Content-Type: application/json' \
+            --data "$(jq -nc --arg text "$MSG" '{text:$text}')" \
+            "$SLACK_WEBHOOK_URL"
