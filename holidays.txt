@@ -10,6 +10,7 @@
 2026-04-03  # Good Friday
 2026-05-01  # Labour Day
 2026-05-28  # Bakr-Id
+2026-07-03  # Sick Leave
 2026-08-28  # Raksha Bandhan
 2026-09-14  # Ganesh Chaturthi
 2026-10-02  # Gandhi Jayanti
