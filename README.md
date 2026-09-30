@@ -1,6 +1,6 @@
 # greytHR attendance automation
 
-Automatically signs you into greytHR every weekday at 10 AM IST. Runs on GitHub Actions — nothing to install, no server needed.
+Automatically signs you into greytHR every weekday at 5 AM IST. Runs on GitHub Actions — nothing to install, no server needed.
 
 ## Setup 
 
@@ -17,7 +17,7 @@ Automatically signs you into greytHR every weekday at 10 AM IST. Runs on GitHub 
 
 4. **Test it** — *Actions* tab → *greytHR sign-in* → *Run workflow*. If the log shows `Result: signed-in`, you're done.
 
-It now fires every Mon–Fri at ~10 AM IST.
+It now fires every Mon–Fri from ~5 AM IST, with two retries in case GitHub's scheduler runs late.
 
 ## Get notified on your phone (recommended)
 
@@ -52,10 +52,26 @@ One date per line, format `YYYY-MM-DD`. The bot skips these. Saturdays and Sunda
 Edit the cron in [`.github/workflows/attendance.yml`](.github/workflows/attendance.yml). Cron is in UTC — subtract **5h 30m** for IST.
 
 ```yaml
-- cron: '30 4 * * 1-5'   # 10:00 IST
-- cron: '30 1 * * 1-5'   # 07:00 IST
+- cron: '30 23 * * 0-4'  # 05:00 IST (note: UTC day shifts back)
+- cron: '15 0 * * 1-5'   # 05:45 IST (retry)
 ```
 
 ## Update password
 
 *Settings → Secrets → `GREYTHR_PASSWORD` → Update*. No code change needed.
+
+## Why it stopped working before
+
+GitHub **automatically disables scheduled workflows after 60 days with no
+repository activity**. The last commit here was 2026-07-03, so the schedule was
+switched off around 2026-09-01 and every morning after that silently did
+nothing — no run, no failure, no notification.
+
+The workflow now pushes a small `.keepalive` commit whenever the newest commit
+is more than 30 days old, which resets that 60-day clock. If it ever does go
+quiet again, check **Actions → greytHR sign-in** for an "enable workflow"
+banner, or run:
+
+```
+gh workflow enable .github/workflows/attendance.yml
+```

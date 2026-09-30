@@ -2,9 +2,17 @@ name: greytHR sign-in
 
 on:
   schedule:
-    # 04:30 UTC = 10:00 IST. GitHub cron can drift up to ~15 min.
-    - cron: '30 4 * * 1-5'
+    # Target: 05:00 IST. GitHub's scheduler is best-effort and has been seen to
+    # drift by hours on busy runners, so we fire early and retry. attendance.js
+    # is idempotent — a retry after a successful sign-in just reports
+    # "already-signed-in" and does nothing.
+    - cron: '30 23 * * 0-4'   # 23:30 UTC = 05:00 IST (Mon-Fri IST)
+    - cron: '15 0 * * 1-5'    # 00:15 UTC = 05:45 IST (retry)
+    - cron: '0 1 * * 1-5'     # 01:00 UTC = 06:30 IST (retry)
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 concurrency:
   group: greythr-sign-in
@@ -54,9 +62,10 @@ jobs:
             success)
               case "$RESULT" in
                 signed-in)         TITLE="greytHR"; BODY="Your attendance has been marked for today at greytHR ✓"; TAGS="white_check_mark"; PRIORITY="default" ;;
-                already-signed-in) TITLE="greytHR"; BODY="You are already signed in at greytHR for today"; TAGS="white_check_mark"; PRIORITY="default" ;;
-                weekend)           TITLE="greytHR"; BODY="Weekend — no attendance needed today"; TAGS="sleeping"; PRIORITY="low" ;;
-                holiday)           TITLE="greytHR"; BODY="Holiday today — no attendance needed"; TAGS="palm_tree"; PRIORITY="low" ;;
+                # Silent: these are the retry crons finding the work already
+                # done, or a day off. Notifying would mean 3 pings every morning.
+                already-signed-in|weekend|holiday)
+                  echo "Result '$RESULT' — nothing to notify."; exit 0 ;;
                 *)                 TITLE="greytHR"; BODY="Run finished ($RESULT)"; TAGS="white_check_mark"; PRIORITY="default" ;;
               esac
               ;;
@@ -74,3 +83,23 @@ jobs:
             -H "Priority: $PRIORITY" \
             -d "$BODY" \
             "https://ntfy.sh/$NTFY_TOPIC"
+
+      # GitHub disables scheduled workflows after 60 days with no repository
+      # activity — that is what silently killed this automation in Sept 2026.
+      # Push a dated marker commit whenever the last commit is over 30 days old.
+      - name: Keep the schedule alive
+        if: always()
+        continue-on-error: true
+        run: |
+          age_days=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 86400 ))
+          echo "Last commit is $age_days day(s) old."
+          if [ "$age_days" -lt 30 ]; then
+            echo "Recent enough — no keepalive commit needed."
+            exit 0
+          fi
+          date -u +'%Y-%m-%dT%H:%M:%SZ' > .keepalive
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .keepalive
+          git commit -m 'chore: keepalive so the cron schedule stays enabled'
+          git push origin "HEAD:${{ github.ref_name }}"
