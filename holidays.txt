@@ -14,5 +14,6 @@
 2026-08-28  # Raksha Bandhan
 2026-09-14  # Ganesh Chaturthi
 2026-10-02  # Gandhi Jayanti
+2026-10-05  # Personal
 2026-10-20  # Dussehra
 2026-12-25  # Christmas
